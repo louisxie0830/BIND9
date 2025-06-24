@@ -1,0 +1,53 @@
+options {
+    directory "/var/cache/bind";  # 指定工作目錄，用於儲存快取與中繼檔案
+
+    // 定義可信客服端網段
+    acl "trusted" {
+        localhost;  # 本機
+        192.168.0.0/16;  # 私有網段
+        10.0.0.0/8;      # 私有網段
+    };
+
+    // 遞迴查詢設定：僅允許可信客戶端執行遞迴
+    recursion yes;
+    allow-recursion { trusted; };
+
+    // 權威區域查詢：允許所有客戶端對權威區域查詢
+    allow-query { any; };
+
+    // 快取區查詢：僅限可信客戶端，避免公開快取被濫用
+    allow-query-cache { trusted; };
+
+    // 禁止區域傳送，防止外部取得整區資料
+    allow-transfer { none; };
+
+    // 最小化回應，減少不必要資訊洩露
+    minimal-responses yes;
+
+    // 隱藏版本號，防止指紋分析攻擊
+    version "not currently available";
+
+    // DNS 請求速率限制，降低放大攻擊風險
+    rate-limit {
+        responses-per-second 5;
+        window 5;
+    };
+
+    // 限制遞迴查詢的深度與查詢數量，減少資源耗盡風險
+    max-recursion-queries 100;
+    max-recursion-depth 32;
+
+    // 上游轉發 DNS 伺服器
+    forwarders {
+        8.8.8.8;  # Google Public DNS
+        1.1.1.1;  # Cloudflare DNS
+    };
+
+    // 開啟 DNSSEC 驗證，保護回應完整性
+    dnssec-validation auto;
+    auth-nxdomain no;          # 遵循 RFC1035 回應 NXDOMAIN
+
+    // 在所有網卡的 IPv4/IPv6 介面監聽
+    listen-on { any; };
+    listen-on-v6 { any; };
+};

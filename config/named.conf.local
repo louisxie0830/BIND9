@@ -1,0 +1,4 @@
+zone "mobile.taipeifubon.com.tw" {
+    type master;
+    file "/etc/bind/zones/db.mobile.taipeifubon.com.tw";
+};
